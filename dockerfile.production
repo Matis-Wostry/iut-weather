@@ -1,0 +1,33 @@
+# --------------------------------------------------------------------
+# Build stage: install Composer dependencies and build front
+# --------------------------------------------------------------------
+FROM donovanbroquin/iut-laravel:laravel AS builder
+
+COPY ./laravel .
+
+RUN composer install --optimize-autoloader --classmap-authoritative && \
+    npm i && \
+    npm run build
+
+# --------------------------------------------------------------------
+# Final stage: merge app with build artifacts and run commands
+# --------------------------------------------------------------------
+FROM donovanbroquin/iut-laravel:production-pre-build
+
+ARG APP_DEBUG=true
+ARG DB_CONNECTION=sqlite
+
+ENV APP_DEBUG=$APP_DEBUG
+ENV DB_CONNECTION=$DB_CONNECTION
+
+# Copy app, build artifacts
+COPY --chown=www-data ./laravel .
+COPY --chown=www-data --from=builder /var/www/app/vendor /var/www/app/vendor
+COPY --chown=www-data --from=builder /var/www/app/public /var/www/app/public
+
+# App specific commands
+RUN touch database/database.sqlite && \
+    touch .env && \
+    echo APP_KEY= > .env && \
+    php artisan key:generate && \
+    php artisan migrate --force
