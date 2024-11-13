@@ -1,0 +1,43 @@
+services:
+  laravel:
+    container_name: laravel
+    restart: unless-stopped
+    build:
+      context: .
+      dockerfile: dockerfile
+      args:
+        - USER_ID=$USER_ID
+        - GROUP_ID=$GROUP_ID
+    networks:
+      - laravel
+    ports:
+      - 5173:5173
+    volumes:
+      - ./laravel:/var/www/app
+
+  nginx:
+    container_name: nginx
+    restart: unless-stopped
+    image: donovanbroquin/iut-laravel:nginx
+    networks:
+      - laravel
+    ports:
+      - 80:80
+    volumes:
+      - ./laravel:/var/www/app
+    depends_on:
+      - laravel
+
+  mailpit:
+    container_name: mailpit
+    image: axllent/mailpit:v1.20.2
+    restart: unless-stopped
+    networks:
+      - laravel
+    ports:
+      - 8025:8025
+
+networks:
+  laravel:
+    name: laravel
+    driver: bridge
