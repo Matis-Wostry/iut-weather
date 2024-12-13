@@ -48,18 +48,13 @@ class FetchWeather extends Command
      */
     public function handle()
     {
-        // Récupérer le nom de la ville depuis les arguments
         $cityName = $this->argument('city');
 
-        // Afficher un message de démarrage
         $this->info("Fetching weather data for {$cityName}...");
 
-        // Appeler le service pour obtenir les données météo
         $weatherData = $this->weatherService->getWeatherForCity($cityName);
 
-        // Vérifier si les données météo ont été récupérées avec succès
         if ($weatherData) {
-            // Afficher les informations météo
             $this->info("City: {$weatherData['name']}");
             $this->info("Coordinates: Latitude {$weatherData['coord']['lat']}, Longitude {$weatherData['coord']['lon']}");
             $this->info("Temperature: {$weatherData['main']['temp']}°C");
@@ -67,7 +62,6 @@ class FetchWeather extends Command
             $this->info("Humidity: {$weatherData['main']['humidity']}%");
             $this->info("Wind Speed: {$weatherData['wind']['speed']} m/s");
         } else {
-            // Afficher un message d'erreur si les données n'ont pas pu être récupérées
             $this->error("Could not fetch weather data for {$cityName}. Please check the city name and try again.");
         }
 
