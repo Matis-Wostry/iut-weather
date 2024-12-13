@@ -40,13 +40,19 @@ class WeatherController extends Controller
 
     public function showForecast(Request $request)
     {
-        // Récupérer le nom de la ville depuis la requête
         $cityName = $request->input('city');
-
-        // Obtenir les prévisions sur 7 jours pour la ville
         $forecastData = $this->weatherService->getForecastForCity($cityName);
 
-        // Afficher la vue avec les données de prévisions météo
         return view('forecast', compact('forecastData', 'cityName'));
+    }
+
+    public function showDayDetails(Request $request)
+    {
+        $cityName = $request->input('city');
+        $date = $request->input('date');
+
+        $hourlyData = $this->weatherService->getHourlyForecastForDay($cityName, $date);
+
+        return view('day-details', compact('hourlyData', 'cityName', 'date'));
     }
 }

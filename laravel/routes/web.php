@@ -22,11 +22,14 @@ Route::middleware('auth')->group(function () {
     Route::post('/favorites', [FavoriteCityController::class, 'addFavorite'])->name('favorites.add');
     Route::delete('/favorites/{city}', [FavoriteCityController::class, 'removeFavorite'])->name('favorites.remove');
     Route::patch('/favorites/{city}/toggle', [FavoriteCityController::class, 'toggleFavorite'])->name('favorites.toggle');
+    Route::post('/update-preferences', [UserController::class, 'updatePreferences'])->name('update.preferences');
 
 });
 
 Route::get('/home', [WeatherController::class, 'home'])->name('home');
 Route::post('/weather/search', [WeatherController::class, 'searchWeather'])->name('weather.search');
-Route::post('/weather/forecast', [WeatherController::class, 'showForecast'])->name('weather.forecast');
+Route::get('/weather/forecast', [WeatherController::class, 'showForecast'])->name('weather.forecast');
+Route::get('/weather/forecast/day-details', [WeatherController::class, 'showDayDetails'])->name('forecast.day-details');
+
 
 require __DIR__.'/auth.php';

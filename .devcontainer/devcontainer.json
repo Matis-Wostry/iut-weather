@@ -1,0 +1,8 @@
+{
+    "name": "Laravel Dev Environment",
+    "dockerComposeFile": "../compose.yml",
+    "service": "laravel",
+    "workspaceFolder": "/var/www/app",
+    "shutdownAction": "stopCompose",
+    "remoteUser": "laravel"
+}

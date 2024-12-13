@@ -25,7 +25,7 @@
         <p>Current Temperature: {{ $weatherData['main']['temp'] }}°C</p>
         <p>Weather: {{ $weatherData['weather'][0]['description'] }}</p>
 
-        <form action="{{ route('weather.forecast') }}" method="POST">
+        <form action="{{ route('weather.forecast') }}" method="GET">
             @csrf
             <input type="hidden" name="city" value="{{ $weatherData['name'] }}">
             <button type="submit">View Forecast</button>
@@ -53,7 +53,7 @@
                 @else
                     <p>No weather data available for this city.</p>
                 @endif
-                <form action="{{ route('weather.forecast') }}" method="POST">
+                <form action="{{ route('weather.forecast') }}" method="GET">
                     @csrf
                     <input type="hidden" name="city" value="{{ $city->name }}">
                     <button type="submit">View Forecast</button>

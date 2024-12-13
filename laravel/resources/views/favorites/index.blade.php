@@ -39,6 +39,15 @@
         <button type="submit">Add to List</button>
     </form>
 
+    <form action="{{ route('update.preferences') }}" method="POST">
+        @csrf
+        <label>
+            <input type="checkbox" name="wants_email" {{ Auth::user()->wants_email ? 'checked' : '' }}>
+                I want to receive daily weather emails
+        </label>
+        <button type="submit">Save Preferences</button>
+    </form>
+
     <hr>
 
         <!-- List of cities with options to update or remove -->
