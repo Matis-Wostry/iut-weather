@@ -1,35 +1,35 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\WeatherController;
 use App\Http\Controllers\FavoriteCityController;
+use App\Http\Controllers\UserController;
+use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+// Now the dashboard route calls the dashboard method in WeatherController
+Route::get('/dashboard', [WeatherController::class, 'dashboard'])->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
+    // Profile routes
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
+    // Favorite city routes
     Route::get('/favorites', [FavoriteCityController::class, 'index'])->name('favorites.index');
     Route::post('/favorites', [FavoriteCityController::class, 'addFavorite'])->name('favorites.add');
     Route::delete('/favorites/{city}', [FavoriteCityController::class, 'removeFavorite'])->name('favorites.remove');
     Route::patch('/favorites/{city}/toggle', [FavoriteCityController::class, 'toggleFavorite'])->name('favorites.toggle');
     Route::post('/update-preferences', [UserController::class, 'updatePreferences'])->name('update.preferences');
-
 });
 
-Route::get('/home', [WeatherController::class, 'home'])->name('home');
+// Weather routes
 Route::post('/weather/search', [WeatherController::class, 'searchWeather'])->name('weather.search');
 Route::get('/weather/forecast', [WeatherController::class, 'showForecast'])->name('weather.forecast');
 Route::get('/weather/forecast/day-details', [WeatherController::class, 'showDayDetails'])->name('forecast.day-details');
-
 
 require __DIR__.'/auth.php';

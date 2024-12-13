@@ -38,7 +38,7 @@
     <h2>Your Favorite Cities Weather</h2>
     <!-- Button to access the favorites page -->
     <a href="{{ route('favorites.index') }}">
-        <button>Manage Favorites</button>
+        <button >Manage Favorites</button>
     </a>
     @if($favoriteCities->isEmpty())
         <p>No favorite cities selected yet.</p>
@@ -56,7 +56,7 @@
                 <form action="{{ route('weather.forecast') }}" method="GET">
                     @csrf
                     <input type="hidden" name="city" value="{{ $city->name }}">
-                    <button type="submit">View Forecast</button>
+                    <button type="submit" class="bg-transparent hover:bg-blue-500 text-blue-700 font-semibold hover:text-white py-2 px-4 border border-blue-500 hover:border-transparent rounded">View Forecast</button>
                 </form>
             @endif
             

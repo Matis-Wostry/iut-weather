@@ -10,9 +10,13 @@ class WeatherService
 
     public function __construct()
     {
+        // Retrieve API key from config
         $this->apiKey = config('services.openweather.key');
     }
 
+    /**
+     * Get current weather for a given city.
+     */
     public function getWeatherForCity($cityName)
     {
         $response = Http::get('https://api.openweathermap.org/data/2.5/weather', [
@@ -28,6 +32,9 @@ class WeatherService
         return null;
     }
 
+    /**
+     * Get a multi-day forecast for a given city.
+     */
     public function getForecastForCity($cityName)
     {
         $response = Http::get('https://api.openweathermap.org/data/2.5/forecast', [
@@ -42,7 +49,7 @@ class WeatherService
             $dailyData = [];
             foreach ($data['list'] as $forecast) {
                 $date = \Carbon\Carbon::createFromTimestamp($forecast['dt'])->format('Y-m-d');
-                
+
                 if (!isset($dailyData[$date])) {
                     $dailyData[$date] = [
                         'temperatures' => [],
@@ -74,6 +81,9 @@ class WeatherService
         return null;
     }
 
+    /**
+     * Get hourly forecast data for a specific day for a given city.
+     */
     public function getHourlyForecastForDay($cityName, $date)
     {
         $response = Http::get('https://api.openweathermap.org/data/2.5/forecast', [
@@ -85,7 +95,6 @@ class WeatherService
         if ($response->successful()) {
             $data = $response->json();
 
-            // Filtrer les données horaires pour la date sélectionnée
             $hourlyData = [];
             foreach ($data['list'] as $forecast) {
                 $forecastDate = \Carbon\Carbon::createFromTimestamp($forecast['dt'])->format('Y-m-d');
@@ -102,6 +111,6 @@ class WeatherService
             return $hourlyData;
         }
 
-    return null;
-}
+        return null;
+    }
 }

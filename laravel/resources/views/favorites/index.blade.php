@@ -1,91 +1,77 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Favorite Cities Management</title>
-</head>
-<body>
-    <h1>Manage Your Favorite Cities</h1>
+<!-- resources/views/favorites/index.blade.php -->
+<x-app-layout>
+    <x-slot name="header">
+        <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
+            Manage Your Favorite Cities
+        </h2>
+    </x-slot>
 
-    <!-- Display success messages if present -->
-    @if (session('success'))
-        <div style="color: green;">
-            {{ session('success') }}
-        </div>
-    @endif
+    <div class="py-12">
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 bg-white dark:bg-gray-800 p-6 text-gray-900 dark:text-gray-100 overflow-hidden shadow-sm sm:rounded-lg">
+            @if (session('success'))
+                <div style="color: green;">
+                    {{ session('success') }}
+                </div>
+            @endif
 
-        <!-- Form to add a new favorite city -->
-    <h2>Add a New City</h2>
+            <!-- Form to add a new favorite city -->
+            <h2>Add a New City</h2>
+            <form action="{{ route('favorites.add') }}" method="POST">
+                @csrf
+                <label for="name">City Name:</label>
+                <input type="text" name="name" id="name" required>
 
-    <!-- Button to access the favorites page -->
-    <a href="{{ route('home') }}">
-        <button>Home</button>
-    </a>
+                <label for="country">Country (optional):</label>
+                <input type="text" name="country" id="country">
+                <button type="submit">Add to List</button>
+            </form>
 
-    <hr>
-    
-    <form action="{{ route('favorites.add') }}" method="POST">
-        @csrf
-        <!-- Input for city name -->
-        <label for="name">City Name:</label>
-        <input type="text" name="name" id="name" required>
+            <!-- Form to update user's email preferences -->
+            <form action="{{ route('update.preferences') }}" method="POST" style="margin-top:20px;">
+                @csrf
+                <label>
+                    <input type="checkbox" name="wants_email" {{ Auth::user()->wants_email ? 'checked' : '' }}>
+                    I want to receive daily weather emails
+                </label>
+                <button type="submit">Save Preferences</button>
+            </form>
 
-        <!-- Input for country (optional) -->
-        <label for="country">Country (optional):</label>
-        <input type="text" name="country" id="country">
+            <hr style="margin:20px 0;"/>
 
-        <!-- Submit button to add the city -->
-        <button type="submit">Add to List</button>
-    </form>
-
-    <form action="{{ route('update.preferences') }}" method="POST">
-        @csrf
-        <label>
-            <input type="checkbox" name="wants_email" {{ Auth::user()->wants_email ? 'checked' : '' }}>
-                I want to receive daily weather emails
-        </label>
-        <button type="submit">Save Preferences</button>
-    </form>
-
-    <hr>
-
-        <!-- List of cities with options to update or remove -->
-        <h2>Your Cities</h2>
-    @if($favoriteCities->isEmpty())
-        <p>You don't have any favorite cities yet.</p>
-    @else
-        <ul>
-            @foreach ($favoriteCities as $city)
-                <li>
-                    {{ $city->name }} 
-                    @if ($city->pivot->is_favorite)
-                        <strong>(Favorite)</strong>
-                    @endif
-
-                    <!-- Form to mark or unmark as favorite -->
-                    <form action="{{ route('favorites.toggle', $city->id) }}" method="POST" style="display:inline;">
-                        @csrf
-                        @method('PATCH')
-                        <button type="submit">
+            <!-- List of user's cities -->
+            <h2>Your Cities</h2>
+            @if($favoriteCities->isEmpty())
+                <p>You don't have any favorite cities yet.</p>
+            @else
+                <ul>
+                    @foreach ($favoriteCities as $city)
+                        <li>
+                            {{ $city->name }} 
                             @if ($city->pivot->is_favorite)
-                                Unmark Favorite
-                            @else
-                                Mark as Favorite
+                                <strong>(Favorite)</strong>
                             @endif
-                        </button>
-                    </form>
 
-                    <!-- Form to remove the city from favorites -->
-                    <form action="{{ route('favorites.remove', $city->id) }}" method="POST" style="display:inline;">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit">Remove</button>
-                    </form>
-                </li>
-            @endforeach
-        </ul>
-    @endif
-</body>
-</html>
+                            <form action="{{ route('favorites.toggle', $city->id) }}" method="POST" style="display:inline;">
+                                @csrf
+                                @method('PATCH')
+                                <button class="bg-transparent mb-4 hover:bg-blue-500 text-blue-700 font-semibold hover:text-white py-2 px-4 border border-blue-500 hover:border-transparent rounded" type="submit">
+                                    @if ($city->pivot->is_favorite)
+                                        Unmark Favorite
+                                    @else
+                                        Mark as Favorite
+                                    @endif
+                                </button>
+                            </form>
 
+                            <form action="{{ route('favorites.remove', $city->id) }}" method="POST" style="display:inline;">
+                                @csrf
+                                @method('DELETE')
+                                <button class="bg-transparent hover:bg-blue-500 text-blue-700 font-semibold hover:text-white py-2 px-4 border border-blue-500 hover:border-transparent rounded" type="submit">Remove</button>
+                            </form>
+                        </li>
+                    @endforeach
+                </ul>
+            @endif
+        </div>
+    </div>
+</x-app-layout>
