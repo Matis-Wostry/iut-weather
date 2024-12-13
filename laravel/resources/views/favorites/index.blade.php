@@ -15,7 +15,7 @@
             @endif
 
             <!-- Form to add a new favorite city -->
-            <h2>Add a New City</h2>
+            <h2><strong>Add a New City</strong></h2>
             <form action="{{ route('favorites.add') }}" method="POST">
                 @csrf
                 <label for="name">City Name:</label>
