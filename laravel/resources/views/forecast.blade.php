@@ -25,7 +25,6 @@
 
 <body>
     <h1>Weather Forecast for {{ $cityName }}</h1>
-
     <div class="forecast-container">
         @if($forecastData)
             @foreach($forecastData as $day)
