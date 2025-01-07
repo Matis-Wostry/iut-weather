@@ -5,26 +5,27 @@ namespace App\Console\Commands;
 use Illuminate\Console\Command;
 use App\Services\WeatherService;
 use App\Mail\WeatherForecastMail;
+use App\Models\User;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 
-// php artisan weather:email-forecast "Paris" --email=matiswostry@gmail.com
+// php artisan weather:send-weekly-emails
 
-class EmailWeatherForecast extends Command
+class EmailFavoriteForecast extends Command
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'weather:email-forecast {city : The name of the city to fetch weather forecast for} {--email= : The email address to send the forecast to}';
+    protected $signature = 'weather:send-weekly-emails';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Fetch weather forecast for a city and send it via email with a CSV attachment';
+    protected $description = 'Send weekly weather forecast emails to users who opted in';
 
     /**
      * The WeatherService instance.
@@ -53,36 +54,47 @@ class EmailWeatherForecast extends Command
      */
     public function handle()
     {
-        // Retrieve the city name from arguments
-        $cityName = $this->argument('city');
+        $this->info("Fetching users who opted for weekly weather emails...");
 
-        // Retrieve the email option or use the default from .env
-        $recipientEmail = $this->option('email') ?? config('mail.from.address');
+        $users = User::where('wants_email', true)->get();
 
-        $this->info("Fetching weather forecast for {$cityName}...");
-
-        // Call the WeatherService to get forecast data
-        $forecastData = $this->weatherService->getForecastForCity($cityName);
-
-        if (!$forecastData) {
-            $this->error("Could not fetch weather forecast for {$cityName}. Please check the city name and try again.");
-            return 1;
+        if ($users->isEmpty()) {
+            $this->info("No users found with weekly email preference enabled.");
+            return 0;
         }
 
-        // Generate the HTML table from forecast data
-        $htmlTable = $this->generateHtmlTable($forecastData, $cityName);
+        foreach ($users as $user) {
+            $this->info("Processing user: {$user->email}");
 
-        // Generate the CSV file from forecast data
-        $csvPath = $this->generateCsv($forecastData, $cityName);
+            $favoriteCities = $user->favoriteCities;
 
-        // Send the email with the HTML table and CSV attachment
-        Mail::to($recipientEmail)->send(new WeatherForecastMail($cityName, $htmlTable, $csvPath));
+            // Filtrer les villes selon la préférence
+            if ($user->forecast_scope == 'favorite') {
+                $favoriteCities = $favoriteCities->filter(function ($city) {
+                    return $city->pivot->is_favorite; // Garde uniquement la ville favorite
+                });
+            }
 
-        // Delete the CSV file after sending the email
-        Storage::delete($csvPath);
+            foreach ($favoriteCities as $city) {
+                $this->info("Fetching forecast for city: {$city->name}");
+                $forecastData = $this->weatherService->getForecastForCity($city->name);
 
-        $this->info("Weather forecast for {$cityName} has been emailed to {$recipientEmail}.");
+                if (!$forecastData) {
+                    $this->error("Failed to fetch forecast for city: {$city->name}");
+                    continue;
+                }
 
+                $htmlTable = $this->generateHtmlTable($forecastData, $city->name);
+                $csvPath = $this->generateCsv($forecastData, $city->name);
+
+                Mail::to($user->email)->send(new WeatherForecastMail($city->name, $htmlTable, $csvPath));
+                $this->info("Email sent to {$user->email} for city: {$city->name}");
+
+                Storage::delete($csvPath);
+            }
+        }
+
+        $this->info("Weekly weather emails sent successfully.");
         return 0;
     }
 
@@ -129,16 +141,12 @@ class EmailWeatherForecast extends Command
         $filename = "weather_forecast_{$cityName}_" . now()->format('Ymd_His') . ".csv";
         $filepath = "public/csv/{$filename}";
 
-        // Create the directory if it doesn't exist
         Storage::makeDirectory('public/csv');
 
-        // Open a stream to write the CSV
         $handle = fopen(storage_path("app/{$filepath}"), 'w');
 
-        // Write the header row
         fputcsv($handle, ['Date', 'Average Temperature (°C)', 'Dominant Weather']);
 
-        // Write the forecast data
         foreach ($forecastData as $day) {
             $formattedDate = \Carbon\Carbon::parse($day['date'])->format('l, F j');
             $averageTemp = $day['averageTemp'];

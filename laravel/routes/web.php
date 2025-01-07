@@ -24,7 +24,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/favorites', [FavoriteCityController::class, 'addFavorite'])->name('favorites.add');
     Route::delete('/favorites/{city}', [FavoriteCityController::class, 'removeFavorite'])->name('favorites.remove');
     Route::patch('/favorites/{city}/toggle', [FavoriteCityController::class, 'toggleFavorite'])->name('favorites.toggle');
-    Route::post('/update-preferences', [UserController::class, 'updatePreferences'])->name('update.preferences');
+    Route::post('/update-preferences', [ProfileController::class, 'updatePreferences'])->name('update.preferences');
 });
 
 // Weather routes

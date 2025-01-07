@@ -19,21 +19,35 @@
             <form action="{{ route('favorites.add') }}" method="POST">
                 @csrf
                 <label for="name">City Name:</label>
-                <input type="text" name="name" id="name" required>
+                <input type="text" name="name" id="name" style="color: black;" required>
 
                 <label for="country">Country (optional):</label>
-                <input type="text" name="country" id="country">
+                <input type="text" name="country" id="country" style="color: black;">
                 <button type="submit">Add to List</button>
             </form>
 
             <!-- Form to update user's email preferences -->
             <form action="{{ route('update.preferences') }}" method="POST" style="margin-top:20px;">
+                 @csrf
+                <input type="hidden" name="wants_email" value="{{ Auth::user()->wants_email ? '0' : '1' }}">
+                <button type="submit" 
+                    class="font-semibold py-2 px-4 rounded"
+                    style="
+                    background-color: {{ Auth::user()->wants_email ? 'green' : 'red' }};
+                    color: white;
+                    border: none;
+                    cursor: pointer;">
+                    {{ Auth::user()->wants_email ? 'Disable Weekly Emails' : 'Enable Weekly Emails' }}
+                </button>
+            </form>
+
+            <form action="{{ route('update.preferences') }}" method="POST" style="margin-top:20px;">
                 @csrf
-                <label>
-                    <input type="checkbox" name="wants_email" {{ Auth::user()->wants_email ? 'checked' : '' }}>
-                    I want to receive daily weather emails
-                </label>
-                <button type="submit">Save Preferences</button>
+                <label for="forecast_scope">Receive forecasts for:</label>
+                <select style="color: black;" name="forecast_scope" id="forecast_scope" onchange="this.form.submit()">
+                    <option value="all" {{ Auth::user()->forecast_scope == 'all' ? 'selected' : '' }}>All Cities</option>
+                    <option value="favorite" {{ Auth::user()->forecast_scope == 'favorite' ? 'selected' : '' }}>Favorite City Only</option>
+                </select>
             </form>
 
             <hr style="margin:20px 0;"/>

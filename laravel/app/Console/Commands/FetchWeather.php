@@ -5,6 +5,8 @@ namespace App\Console\Commands;
 use Illuminate\Console\Command;
 use App\Services\WeatherService;
 
+/* php artisan weather:fetch Paris */
+
 class FetchWeather extends Command
 {
     /**

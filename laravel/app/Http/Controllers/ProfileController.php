@@ -61,7 +61,14 @@ class ProfileController extends Controller
     public function updatePreferences(Request $request)
     {
         $user = Auth::user();
-        $user->wants_email = $request->has('wants_email');
+        if ($request->has('wants_email')) {
+            $user->wants_email = $request->input('wants_email') == '1';
+        }
+
+        if ($request->has('forecast_scope')) {
+            $user->forecast_scope = $request->input('forecast_scope');
+        }
+
         $user->save();
 
         return redirect()->back()->with('status', 'Preferences updated successfully!');
