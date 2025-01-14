@@ -32,4 +32,8 @@ Route::post('/weather/search', [WeatherController::class, 'searchWeather'])->nam
 Route::get('/weather/forecast', [WeatherController::class, 'showForecast'])->name('weather.forecast');
 Route::get('/weather/forecast/day-details', [WeatherController::class, 'showDayDetails'])->name('forecast.day-details');
 
+Route::get('/test-csrf', function () {
+    return response()->json(['message' => 'CSRF middleware works!']);
+});
+
 require __DIR__.'/auth.php';
