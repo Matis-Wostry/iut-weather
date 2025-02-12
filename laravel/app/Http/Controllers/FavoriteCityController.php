@@ -16,7 +16,6 @@ class FavoriteCityController extends Controller
 
     public function addFavorite(Request $request)
     {
-        // Call the service to add the city to the user's favorites
         $this->favoriteCityService->addFavorite($request->only('name', 'country'));
 
         return redirect()->back()->with('success', 'City added to favorites');

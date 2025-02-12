@@ -21,6 +21,8 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'wants_email',
+        'forecast_scope'
     ];
 
     /**
@@ -48,7 +50,7 @@ class User extends Authenticatable
 
     public function favoriteCities() {
         return $this->belongsToMany(City::class, 'user_cities')
-                    ->withPivot('is_favorite') // Indicator to know if the city is favorite
-                    ->withTimestamps();        // To have the created_at and updated_at fields
+                    ->withPivot('is_favorite')
+                    ->withTimestamps();
     }
 }

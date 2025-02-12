@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Models\User;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Http\Resources\CityResource;
@@ -10,52 +11,97 @@ use Illuminate\Support\Facades\Auth;
 
 class UserPlaceController extends Controller
 {
-    public function index()
+    public function index($userId)
     {
-        $user = Auth::user();
+        $user = User::findOrFail($userId);
         $places = $user->favoriteCities()->paginate(10);
 
         return CityResource::collection($places);
     }
 
-    public function store(Request $request)
+    public function store(Request $request, $userId)
     {
-        $data = $request->validate(['name' => 'required|string', 'country' => 'nullable|string']);
-        $city = City::firstOrCreate($data);
+        $user = User::findOrFail($userId);
+        $data = $request->validate([
+            'name' => 'required|string',
+            'country' => 'nullable|string'
+        ]);
 
-        Auth::user()->favoriteCities()->attach($city);
+        $city = City::firstOrCreate($data);
+        $user->favoriteCities()->attach($city);
 
         return new CityResource($city);
     }
 
-    public function destroy($place)
+
+    public function destroy($userId, $place)
     {
+        $user = User::findOrFail($userId);
         $city = City::findOrFail($place);
-        Auth::user()->favoriteCities()->detach($city);
+
+        $user->favoriteCities()->detach($city);
 
         return response()->json(['message' => 'City removed successfully.']);
     }
 
-    public function toggleForecast($place)
+    public function toggleFavorite($userId, $place)
     {
-        $city = City::findOrFail($place);
-        $user = Auth::user();
+        $user = User::find($userId);
+        if (!$user) {
+            return response()->json(['error' => 'User not found'], 404);
+        }
 
-        $current = $user->favoriteCities()->where('city_id', $city->id)->first()->pivot->receive_forecasts ?? false;
-        $user->favoriteCities()->updateExistingPivot($city->id, ['receive_forecasts' => !$current]);
+        $city = City::find($place);
+        if (!$city) {
+            return response()->json(['error' => 'City not found'], 404);
+        }
 
-        return new CityResource($city);
-    }
+        $pivotEntry = $user->favoriteCities()->where('city_id', $city->id)->first();
 
-    public function toggleFavorite($place)
-    {
-        $city = City::findOrFail($place);
-        $user = Auth::user();
+        if (!$pivotEntry) {
+            return response()->json(['error' => 'City not found in user favorites'], 404);
+        }
 
-        $current = $user->favoriteCities()->where('city_id', $city->id)->first()->pivot->is_favorite ?? false;
+        $current = $pivotEntry->pivot->is_favorite;
         $user->favoriteCities()->updateExistingPivot($city->id, ['is_favorite' => !$current]);
 
-        return new CityResource($city);
+        return response()->json([
+            "id" => $city->id,
+            "name" => $city->name,
+            "favorite" => !$current
+        ]);
     }
+
+    public function toggleEmail($userId)
+    {
+        $user = User::findOrFail($userId);
+
+        $user->wants_email = !$user->wants_email;
+        $user->save();
+
+        return response()->json([
+            'message' => 'Email sending has been ' . ($user->wants_email ? 'enabled' : 'disabled'),
+            'wants_email' => $user->wants_email
+        ]);
+    }
+
+    public function updateForecastScope(Request $request, $userId)
+    {
+        $user = User::findOrFail($userId);
+
+        $validatedData = $request->validate([
+            'forecast_scope' => 'required|in:favorites,all,none'
+        ]);
+
+        $user->update([
+            'forecast_scope' => $validatedData['forecast_scope']
+        ]);
+
+        return response()->json([
+            'message' => 'Forecast scope updated successfully',
+            'forecast_scope' => $user->forecast_scope
+        ]);
+    }
+
 }
 
