@@ -11,8 +11,14 @@ use Illuminate\View\View;
 
 class ProfileController extends Controller
 {
+
     /**
-     * Display the user's profile form.
+     * Display the user's profile edit form.
+     *
+     * This method retrieves the authenticated user and returns the profile edit view.
+     *
+     * @param Request $request - The HTTP request containing user information
+     * @return View - Returns the profile edit view
      */
     public function edit(Request $request): View
     {
@@ -23,6 +29,12 @@ class ProfileController extends Controller
 
     /**
      * Update the user's profile information.
+     *
+     * This method validates and updates the user's profile details.
+     * If the email is changed, the email verification status is reset.
+     *
+     * @param ProfileUpdateRequest $request - The validated request containing updated profile data
+     * @return RedirectResponse - Redirects back to the profile edit page with a status message
      */
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
@@ -38,7 +50,13 @@ class ProfileController extends Controller
     }
 
     /**
-     * Delete the user's account.
+     * Delete the user's account permanently.
+     *
+     * This method validates the user's password before proceeding with deletion.
+     * It logs the user out, deletes their account, and invalidates the session.
+     *
+     * @param Request $request - The HTTP request containing the password confirmation
+     * @return RedirectResponse - Redirects to the homepage after account deletion
      */
     public function destroy(Request $request): RedirectResponse
     {
@@ -58,6 +76,15 @@ class ProfileController extends Controller
         return Redirect::to('/');
     }
 
+    /**
+     * Update the user's email and forecast preferences.
+     *
+     * This method allows users to enable/disable email notifications and
+     * set the scope of weather forecasts they wish to receive.
+     *
+     * @param Request $request - The HTTP request containing the new preferences
+     * @return RedirectResponse - Redirects back with a status message
+     */
     public function updatePreferences(Request $request)
     {
         $user = Auth::user();

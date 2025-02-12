@@ -15,6 +15,10 @@ class Contact extends Mailable
 
     /**
      * Create a new message instance.
+     *
+     * This constructor is used to initialize the email object.
+     * If additional data needs to be passed to the email template,
+     * it should be added as constructor parameters.
      */
     public function __construct()
     {
@@ -22,7 +26,11 @@ class Contact extends Mailable
     }
 
     /**
-     * Get the message envelope.
+     * Get the email envelope.
+     *
+     * The envelope contains metadata about the email, such as the subject.
+     *
+     * @return Envelope The email envelope with a defined subject.
      */
     public function envelope(): Envelope
     {
@@ -32,7 +40,11 @@ class Contact extends Mailable
     }
 
     /**
-     * Get the message content definition.
+     * Get the email content definition.
+     *
+     * This method defines which view will be used as the email body.
+     *
+     * @return Content The content configuration for the email.
      */
     public function content(): Content
     {
@@ -42,9 +54,11 @@ class Contact extends Mailable
     }
 
     /**
-     * Get the attachments for the message.
+     * Get the attachments for the email.
      *
-     * @return array<int, \Illuminate\Mail\Mailables\Attachment>
+     * If the email needs to include attachments, they should be added here.
+     *
+     * @return array<int, \Illuminate\Mail\Mailables\Attachment> An array of attachments (empty if none).
      */
     public function attachments(): array
     {

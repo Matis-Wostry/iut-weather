@@ -1,87 +1,79 @@
 # **iut-weather**
 
-# 🌤️ **Weather API & User Management**
+# 🖥️ Console Commands
 
-This project provides an API to **retrieve weather data**, **manage users' favorite locations**, and **configure email preferences**.
+This project includes several custom **Artisan commands** to manage weather updates, logs, and email notifications.
 
-## 🚀 **Start the Server**
-Before using the API, make sure your Laravel server is running:
+---
 
+## **🔹 1. Fetch Current Weather for a City**
 ```bash
-php artisan serve
+php artisan weather:fetch {city}
 ```
 
-## 🌦️ Weather API
-### Get the current weather for a city
+📌 Description: Retrieves the current weather for a specified city and displays it in the console.  
+📌 Required Parameter: {city} → The name of the city to fetch weather for.
 
-GET /api/v1/weather?place=Paris
-
-📌 Description: Returns the current weather for the specified city.
-📌 Required parameter: place (city name).
-
-### Get the weather forecast for a city
-
-GET /api/v1/weather/forecast?place=Paris
-
-📌 Description: Returns the weather forecast for the upcoming days for the specified city.
-📌 Required parameter: place (city name).
-
-## ⭐ Favorite Locations API
-### Retrieve a user's favorite locations
-
-GET /v1/users/{userId}/places
-
-📌 Description: Returns the favorite locations of the specified user by ID.
-📌 Example: GET /api/v1/users/2/places
-
-### Add a favorite location for a user
-
-POST /api/v1/users/2/places
-
-📌 Description: Adds a favorite location for the specified user by ID.
-📌 Required Body (JSON):
-
-```json
-{
-    "name": "Tokyo",
-    "country": "Japan"
-}
+✅ Example Usage:  
+```bash
+php artisan weather:fetch Paris
 ```
 
-### Remove a favorite location
+✅ Example Output:  
 
-DELETE /api/v1/users/2/places/7
-
-📌 Description: Removes the favorite location specified by city ID for the specified user ID.
-📌 Example : DELETE /api/v1/users/2/places/7
-
-### Toggle a location between favorite and non-favorite
-
-PATCH /api/v1/users/2/places/4/favorite
-
-📌 Description: Modifies whether the specified city ID is a favorite for the specified user ID.
-
-## 📩 Email Management API
-### Enable/Disable email notifications for a user
-
-PATCH /api/v1/users/2/toggle-email
-
-📌 Description: Enables or disables email notifications for the specified user ID.
-
-### Modify weather forecast email preferences
-
-PATCH /api/v1/users/2/update-forecast-scope
-
-📌 Description: Allows the user to choose which weather forecasts they want to receive.
-📌 Required Body (JSON):
-```json
-{
-    "forecast_scope": "none"
-}
+```yaml
+Fetching weather data for Paris...
+City: Paris
+Coordinates: Latitude 48.8566, Longitude 2.3522
+Temperature: 15°C
+Weather: Clear Sky
+Humidity: 72%
+Wind Speed: 3.5 m/s
 ```
 
-📌 Possible values for forecast_scope:
+## **🔹 2. Send Weekly Weather Emails
+```bash
+php artisan weather:send-weekly-emails
+```
+📌 Description: Sends weekly weather forecast emails to users who have opted in.  
+📌 Behavior:  
 
-"none" → Receives no forecasts.
-"all" → Receives all forecasts.
-"favorites" → Receives forecasts only for favorite locations.
+Retrieves users with wants_email = true.  
+Filters favorite cities based on the user’s forecast_scope.  
+Fetches forecasts and generates HTML tables & CSV attachments.  
+Sends emails via Laravel’s Mail system.  
+Automatically deletes the CSV file after sending.  
+
+✅ Example Output:
+
+```yaml
+Fetching users who opted for weekly weather emails...
+Processing user: example@email.com
+Fetching forecast for city: Paris
+Email sent to example@email.com for city: Paris
+Weekly weather emails sent successfully.
+```
+
+## **🔹 3. Send Weather Forecast Email for a Specific City
+```yaml
+php artisan weather:email-forecast {city} --email={email}
+```
+
+📌 Description: Fetches the weather forecast for a specific city and sends it via email, including a CSV attachment.  
+📌 Required Parameter: {city} → The name of the city to fetch weather for.  
+📌 Optional Flag: --email={email} → The recipient’s email address (default: the sender’s email in .env).  
+
+✅ Example Usage:
+```bash
+php artisan weather:email-forecast "Paris" --email=john.doe@example.com
+```
+
+✅ Example Output:
+```yaml
+Fetching weather forecast for Paris...
+Weather forecast for Paris has been emailed to john.doe@example.com.
+```
+✅ Email Contents:  
+
+HTML Table with daily weather forecast.  
+CSV Attachment containing weather data.

@@ -8,14 +8,24 @@ class WeatherService
 {
     protected $apiKey;
 
+    /**
+     * WeatherService constructor.
+     *
+     * Initializes the API key from the Laravel configuration.
+     */
     public function __construct()
     {
-        // Retrieve API key from config
         $this->apiKey = config('services.openweather.key');
     }
 
     /**
-     * Get current weather for a given city.
+     * Get the current weather for a specified city.
+     *
+     * This method fetches the real-time weather data from OpenWeather API
+     * using the city name and returns it in JSON format.
+     *
+     * @param string $cityName The name of the city.
+     * @return array|null The weather data as an associative array or null if the request fails.
      */
     public function getWeatherForCity($cityName)
     {
@@ -33,7 +43,13 @@ class WeatherService
     }
 
     /**
-     * Get a multi-day forecast for a given city.
+     * Get a multi-day weather forecast for a specified city.
+     *
+     * This method retrieves a 5-day weather forecast from OpenWeather API,
+     * processes the data to extract daily average temperatures and dominant weather conditions.
+     *
+     * @param string $cityName The name of the city.
+     * @return array|null The processed forecast data as an associative array or null if the request fails.
      */
     public function getForecastForCity($cityName)
     {
@@ -82,7 +98,14 @@ class WeatherService
     }
 
     /**
-     * Get hourly forecast data for a specific day for a given city.
+     * Get hourly weather forecast data for a specific day in a given city.
+     *
+     * This method retrieves 5-day weather forecast data and filters it
+     * to extract hourly details for a specific date.
+     *
+     * @param string $cityName The name of the city.
+     * @param string $date The date for which hourly data is requested (YYYY-MM-DD format).
+     * @return array|null The hourly forecast data as an associative array or null if the request fails.
      */
     public function getHourlyForecastForDay($cityName, $date)
     {
